@@ -28,13 +28,15 @@
 # ENTRYPOINT ["dotnet", "Worker.dll"]
 
 # Build stage
-FROM --platform=${BUILDPLATFORM} mcr.microsoft.com/dotnet/sdk:7.0 AS build
+# Build stage
+FROM --platform=${BUILDPLATFORM:-linux/amd64} mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
-ARG BUILDPLATFORM
-ARG TARGETPLATFORM
-ARG TARGETARCH
+# Build arguments with default values
+ARG BUILDPLATFORM=linux/amd64
+ARG TARGETPLATFORM=linux/amd64
+ARG TARGETARCH=amd64
 
-RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM with architecture $TARGETARCH"
+RUN echo "Running on platform: $BUILDPLATFORM, building for $TARGETPLATFORM, architecture: $TARGETARCH"
 
 WORKDIR /source
 
@@ -42,7 +44,7 @@ WORKDIR /source
 COPY *.csproj ./
 RUN dotnet restore --arch $TARGETARCH
 
-# Copy all source files and publish the application
+# Copy source files and publish the app
 COPY . ./
 RUN dotnet publish -c Release -o /app --arch $TARGETARCH --self-contained false --no-restore
 
