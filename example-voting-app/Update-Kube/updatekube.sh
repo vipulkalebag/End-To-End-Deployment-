@@ -1,8 +1,12 @@
 #!/bin/bash
 set -xe  # Enable debugging and stop execution on error
 
+git clone https://${GITHUB_TOKEN}@github.com/vipulkalebag/End-To-End-Deployment.git
+
 # DockerHub credentials
 DOCKERHUB_USERNAME="vipul4518"
+
+echo "Current directory: $(pwd)"
 
 # Images and Tags
 IMAGE_TAG=${BUILD_NUMBER}  # Default to 'latest' if BUILD_NUMBER is not set
