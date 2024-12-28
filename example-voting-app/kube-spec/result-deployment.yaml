@@ -15,7 +15,7 @@ spec:
         app: result
     spec:
       containers:
-      - image: vipul4518/resultimg:7
+      - image: vipul4518/resultimg:2
         name: result
         ports:
         - containerPort: 80

@@ -15,5 +15,5 @@ spec:
         app: worker
     spec:
       containers:
-      - image: vipul4518/workerimg:7
+      - image: vipul4518/workerimg:2
         name: worker
