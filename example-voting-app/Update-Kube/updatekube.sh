@@ -3,6 +3,8 @@ set -xe  # Enable debugging and stop execution on error
 
 git clone https://${GITHUB_TOKEN}@github.com/vipulkalebag/End-To-End-Deployment.git
 
+cd Capstone_Project_DIM/example-voting-app || exit 1
+
 # DockerHub credentials
 DOCKERHUB_USERNAME="vipul4518"
 
@@ -12,9 +14,9 @@ echo "Current directory: $(pwd)"
 IMAGE_TAG=${BUILD_NUMBER}  # Default to 'latest' if BUILD_NUMBER is not set
 IMAGES=("voteimg" "resultimg" "workerimg")  # Array of image names
 DEPLOYMENT_FILES=(
-    "example-voting-app/kube-spec/vote-deployment.yaml"
-    "example-voting-app/kube-spec/result-deployment.yaml"
-    "example-voting-app/kube-spec/worker-deployment.yaml"
+    "./kube-spec/vote-deployment.yaml"
+    "./kube-spec/result-deployment.yaml"
+    "./kube-spec/worker-deployment.yaml"
 )  # Array of corresponding deployment files
 
 # Update and deploy each image
