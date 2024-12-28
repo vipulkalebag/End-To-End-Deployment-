@@ -3,7 +3,7 @@ set -xe  # Enable debugging and stop execution on error
 
 git clone https://${GITHUB_TOKEN}@github.com/vipulkalebag/End-To-End-Deployment.git
 
-cd Capstone_Project_DIM/example-voting-app || exit 1
+cd End-To-End-Deployment/example-voting-app || exit 1
 
 # DockerHub credentials
 DOCKERHUB_USERNAME="vipul4518"
