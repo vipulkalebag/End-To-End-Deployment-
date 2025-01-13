@@ -1,0 +1,92 @@
+pipeline {
+    agent any
+    environment {
+        SONAR_HOME = tool "Sonar"
+        GITHUB_TOKEN = credentials('GITHUB_TOKEN') 
+    }
+    
+    stages {
+        stage("workspace cleanup") {
+            steps {
+                script {
+                    cleanWs()
+                }
+            }
+        }
+        stage("Git: code checkout") {
+            steps {
+                script {
+                    git url: "https://${GITHUB_TOKEN}@github.com/vipulkalebag/End-To-End-Deployment.git", branch: "main"
+                }
+            }
+        }
+        stage("Trivy: filesystem scan") {
+            steps {
+                script {
+                    sh "trivy fs . > trivyfs.txt"
+                }
+            }
+        }
+        stage("SonarQube: Code Analysis") {
+            steps {
+                script {
+                    withSonarQubeEnv("Sonar") {
+                        sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=vote-app -Dsonar.projectKey=vote-app"
+                    }
+                }
+            }
+        }
+        stage("SonarQube: Code Quality Gates") {
+            steps {
+                script {
+                    timeout(time: 2, unit: "MINUTES") {
+                        waitForQualityGate abortPipeline: false
+                    }
+                }
+            }
+        }
+        stage("Docker: Build Images") {
+            steps {
+                script {
+                    dir("example-voting-app/vote") {
+                        sh 'docker build -t voteimg:latest .'
+                    }
+                    dir("example-voting-app/worker") {
+                        sh 'docker build -t workerimg:latest .'
+                    }
+                    dir("example-voting-app/result") {
+                        sh 'docker build -t resultimg:latest .'
+                    }
+                }
+            }
+        }
+        stage("image push to docker hub"){
+            steps{
+                withCredentials([usernamePassword(credentialsId: "DockerHubCreds", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]){
+                    sh '''
+                    docker login -u $DOCKER_USER -p $DOCKER_PASS
+                    docker tag voteimg:latest vipul4518/voteimg:${BUILD_NUMBER}
+                    docker tag workerimg:latest vipul4518/workerimg:${BUILD_NUMBER}
+                    docker tag resultimg:latest vipul4518/resultimg:${BUILD_NUMBER}
+                    docker push vipul4518/voteimg:${BUILD_NUMBER}
+                    docker push vipul4518/workerimg:${BUILD_NUMBER}
+                    docker push vipul4518/resultimg:${BUILD_NUMBER}
+                    '''
+                }
+            }
+        }
+        stage("Update Kube-File"){
+            steps{
+                script{
+                    dir("example-voting-app/Update-Kube"){
+                        sh '''
+                        chmod +x ./updatekube.sh
+                        ./updatekube.sh
+                        '''
+                    }
+                }
+            }
+        }
+        
+    }
+}
